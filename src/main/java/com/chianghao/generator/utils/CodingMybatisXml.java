@@ -3,7 +3,6 @@ package com.chianghao.generator.utils;
 import java.io.File;
 import java.io.FileWriter;
 
-
 import com.chianghao.generator.ColumnInfo;
 import com.chianghao.generator.TableInfo;
 
@@ -18,6 +17,7 @@ public class CodingMybatisXml {
 	private TableInfo  tableInfo;
 	private String     packageInfo;
 	
+	
 	/**
 	 * 
 	 * @param filePath      写路径
@@ -30,7 +30,7 @@ public class CodingMybatisXml {
 		this.packageInfo = packageInfo;
 	}
 
-	
+
 	public String getPackageInfo() {
 		return packageInfo;
 	}
@@ -56,19 +56,22 @@ public class CodingMybatisXml {
 			outWriteDir.mkdirs();
 		}
 		
-		File FileDaoDir = new File(outWriteDir,tableInfo.getTableName());
-		if(!FileDaoDir.exists()) {
-			FileDaoDir.mkdirs();
-		}
+//		File FileDaoDir = new File(outWriteDir,tableInfo.getTableName());
+//		if(!FileDaoDir.exists()) {
+//			FileDaoDir.mkdirs();
+//		}
+		
+		
+		
 		
 		//拼xml
 		StringBuffer xmlsb = new StringBuffer();
 		xmlsb.append(""+
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n"+
 				"<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\"> \n"+
-				"<mapper namespace=\""+packageInfo+"."+tableInfo.getTableName()+"."+StringUtils.underlineToCamel(tableInfo.getTableName(), false)+"Dao\" > \n"+
+				"<mapper namespace=\""+this.tableInfo.getClassName()+"\" > \n"+
 				"");
-		xmlsb.append(" <resultMap id=\""+StringUtils.underlineToCamel(tableInfo.getTableName(), true)+"\" type=\"\" >\r\n" );
+		xmlsb.append(" <resultMap id=\""+StringUtils.underlineToCamel(tableInfo.getTableName(), true)+"\" type=\""+this.tableInfo.getClassName()+"\" >\r\n" );
 				  
 	    for(ColumnInfo c:this.tableInfo.getColumnList()) {
 				String firstCharacterLowerCase = StringUtils.firstCharacterLowerCase(c.getColumnName());
@@ -76,16 +79,42 @@ public class CodingMybatisXml {
 		}
 		xmlsb.append(" </resultMap>\r\n");
 		xmlsb.append(" </mapper>");
+		
+		
+		
+		
+		
 		//拼dao
 		StringBuffer daosb = new StringBuffer();
-		daosb.append("package "+packageInfo+"."+tableInfo.getTableName()+";\n");
-		daosb.append("public interface "+StringUtils.underlineToCamel(tableInfo.getTableName(), false)+"Dao{ \n" );
+		daosb.append("package "+packageInfo+".dao;\n");
+		daosb.append("import "+this.tableInfo.getClassName()+";\n");
+		daosb.append("public interface "+tableInfo.getBeanSimpleClassName()+"Mapper extends CoreBaseDao<"+tableInfo.getBeanSimpleClassName()+">{ \n" );
 		
 		daosb.append("}" );
 		
+		
+		//拼daoimpl
+		
+		StringBuffer daoImplSb = new StringBuffer();
+		daoImplSb.append("package "+packageInfo+".daoImpl;\n");
+		daoImplSb.append("import "+this.tableInfo.getClassName()+";\n");
+		daoImplSb.append("import "+packageInfo+".dao."+tableInfo.getBeanSimpleClassName()+"Mapper;\n");
+		daoImplSb.append("import org.springframework.stereotype.Repository;\n");
+		
+		daoImplSb.append("@Repository\r");
+		daoImplSb.append("public class "+this.tableInfo.getBeanSimpleClassName()+"MapperImpl extends CoreBaseDaoImpl<"+this.tableInfo.getBeanSimpleClassName()+"> implements "+this.tableInfo.getBeanSimpleClassName()+"Mapper{ \n" );
+		
+		daoImplSb.append("}" );
+		
+		
+		
 		try {
 			//写xml
-			File file =new File(FileDaoDir,StringUtils.underlineToCamel(tableInfo.getTableName(),false)+"DaoMapper.xml");
+			File fileXml = new File(outWriteDir,"sqlmapper");
+			if(!fileXml.exists()) {
+				fileXml.mkdirs();
+			}
+			File file =new File(fileXml,tableInfo.getBeanSimpleClassName()+"Mapper.xml");
 	        if(!file.exists()){
 	        	file.createNewFile();
 	        }
@@ -95,7 +124,11 @@ public class CodingMybatisXml {
 			fileWritter.close();
 			
 			//写dao
-			File daoFile =new File(FileDaoDir,StringUtils.underlineToCamel(tableInfo.getTableName(),false)+"Dao.java");
+			File fileDao = new File(outWriteDir,"dao");
+			if(!fileDao.exists()) {
+				fileDao.mkdirs();
+			}
+			File daoFile =new File(fileDao,tableInfo.getBeanSimpleClassName()+"Mapper.java");
 			if(!daoFile.exists()){
 				daoFile.createNewFile();
 			}
@@ -103,6 +136,23 @@ public class CodingMybatisXml {
 			daoFileWritter.write(daosb.toString());
 			daoFileWritter.flush();
 			daoFileWritter.close();
+			
+			
+			
+			//写daoImpl
+			File fileDaoImpl = new File(outWriteDir,"daoImpl");
+			if(!fileDaoImpl.exists()) {
+				fileDaoImpl.mkdirs();
+			}
+			File daoImplFile =new File(fileDaoImpl,tableInfo.getBeanSimpleClassName()+"MapperImpl.java");
+			if(!daoImplFile.exists()){
+				daoImplFile.createNewFile();
+			}
+			FileWriter daoImplFileWritter = new FileWriter(daoImplFile);
+			daoImplFileWritter.write(daoImplSb.toString());
+			daoImplFileWritter.flush();
+			daoImplFileWritter.close();
+			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

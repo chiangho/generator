@@ -7,9 +7,11 @@ public class ColumnInfo {
 	public enum ColumnType{
 		
 		string("varchar","String"),
+		bigint("bigint","Long"),
 		integer("int","Integer"),
 		data("date","Date"),
-		time("datetime","Date");
+		time("datetime","Date"),
+		text("text","String");
 		
 		private String dbType;
 		private String javaType;

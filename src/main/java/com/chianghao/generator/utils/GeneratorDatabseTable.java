@@ -31,10 +31,10 @@ public class GeneratorDatabseTable {
 		List<String> tables = dbHelper.queryAllTable();
 		if(isExistTable(tables,tableInfo.getTableName())) {
 			System.out.println(tableInfo.getDropTableSql());
-			dbHelper.execute(tableInfo.getDropTableSql());
+			//dbHelper.execute(tableInfo.getDropTableSql());
 		}
 		System.out.println(tableInfo.getCreateTableSql());
-		dbHelper.execute(tableInfo.getCreateTableSql());
+		//dbHelper.execute(tableInfo.getCreateTableSql());
 	}
 	/**
 	 * 判断表是否存在

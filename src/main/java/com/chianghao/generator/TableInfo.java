@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.chianghao.generator.ColumnInfo.ColumnType;
+import com.chianghao.generator.utils.StringUtils;
 
 public class TableInfo {
 
@@ -12,12 +13,31 @@ public class TableInfo {
 	private String createTableSql;
 	private List<String[]> dataList;
 	private List<ColumnInfo> columnList;
+	private String     beanSimpleClassName;
+	private String     packageName;
 	
+	public String getClassName() {
+		return this.packageName+"."+this.beanSimpleClassName;
+	}
+	public String getPackageName() {
+		return packageName;
+	}
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+	public String getBeanSimpleClassName() {
+		return beanSimpleClassName;
+	}
+	public void setBeanSimpleClassName(String beanSimpleClassName) {
+		this.beanSimpleClassName = beanSimpleClassName;
+	}
+
 	public String getTableName() {
 		return tableName;
 	}
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+		this.beanSimpleClassName = StringUtils.underlineToCamel(tableName, false);
 	}
 	public String getDropTableSql() {
 		return dropTableSql;
